@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/relativeLayout"
+    android:layout_width="fill_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <com.serge45.scanoid.CameraPreview
+        android:id="@+id/cameraPreview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="camera" />
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="0dp"
+        android:addStatesFromChildren="true"
+        android:clipChildren="true"
+        android:contentDescription="priviewAndImage"
+        android:fitsSystemWindows="true"
+        android:gravity="bottom|center_horizontal"
+        android:orientation="vertical"
+        android:showDividers="beginning|middle"
+        android:visibility="visible" >
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|center_horizontal"
+            android:layout_margin="8dp"
+            android:layout_weight="1"
+            android:adjustViewBounds="false"
+            android:contentDescription="Image"
+            android:duplicateParentState="false"
+            android:fitsSystemWindows="true"
+            android:focusable="true"
+            android:minHeight="32dp"
+            android:minWidth="32dp"
+            android:scaleType="fitCenter"
+            android:visibility="visible" />
+
+        <Button
+            android:id="@+id/captureButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Capture" />
+
+    </LinearLayout>
+
+</FrameLayout>
