@@ -18,7 +18,7 @@
         android:weightSum="1" >
 
         <Button
-            android:id="@+id/cameraButton"
+            android:id="@+id/imageList"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="0.5"

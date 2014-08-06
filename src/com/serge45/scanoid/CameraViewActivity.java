@@ -24,6 +24,7 @@ public class CameraViewActivity extends Activity {
 	private int shuttedImageCount = 0;
 	private ImageStorageManager imageManager;
 	private String shutterTAG = "ShutterCount";
+	private boolean isTakingPicture = false;
 	
 	private PictureCallback pictureCallback = new PictureCallback() {
 		
@@ -65,6 +66,8 @@ public class CameraViewActivity extends Activity {
 				imageManager.saveImage(shuttedImageCount, lastCaptureImage);
 			}
 			
+			isTakingPicture = false;
+			
 		}
 	};
 	
@@ -87,6 +90,13 @@ public class CameraViewActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				Log.v(TAG,"Capture button clicked");
+				
+				if (isTakingPicture) {
+					Log.v(TAG,"is taking picture");
+					return;
+				}
+
+				isTakingPicture = true;
 				cameraView.takePicture(pictureCallback);
 			}
 		});

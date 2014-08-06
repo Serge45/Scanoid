@@ -17,7 +17,7 @@ public class MainActivity extends Activity {
 	private Button documentButton;
 	
 	void initViews() {
-		cameraButton = (Button) findViewById(R.id.cameraButton);
+		cameraButton = (Button) findViewById(R.id.imageList);
 		documentButton = (Button) findViewById(R.id.viewDocButton);
 	}
 	
@@ -37,7 +37,7 @@ public class MainActivity extends Activity {
 			public void onClick(View v) {
 				Log.v(TAG, "Document button clicked");
 				Intent intent = new Intent();
-				intent.setClass(MainActivity.this, FileExplore.class);
+				intent.setClass(MainActivity.this, ImageListView.class);
 				startActivity(intent);	
 			}
 		});
