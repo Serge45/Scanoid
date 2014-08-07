@@ -1,7 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ListView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@android:id/list"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:gesture-image="http://schemas.polites.com/android"
+    android:id="@+id/image_list_frame_layout"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content" >
 
-</ListView>
+        <ListView
+            android:id="@android:id/list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
+        </ListView>
+
+        <com.polites.android.GestureImageView
+            android:id="@+id/expandedImageView"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_gravity="center"
+            android:scaleType="fitCenter"
+            android:background="@drawable/abc_ab_bottom_solid_dark_holo"
+            />
+
+        <ProgressBar
+            android:id="@+id/expandedImageProgressBar"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" />
+
+</FrameLayout>
