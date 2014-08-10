@@ -16,9 +16,8 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_gravity="center"
-            android:scaleType="fitCenter"
             android:background="@drawable/abc_ab_bottom_solid_dark_holo"
-            />
+            android:scaleType="centerInside" />
 
         <ProgressBar
             android:id="@+id/expandedImageProgressBar"

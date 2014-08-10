@@ -10,10 +10,16 @@ import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 import com.polites.android.GestureImageView;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.app.ListActivity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Point;
+import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -21,6 +27,7 @@ import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
@@ -35,8 +42,10 @@ public class ImageListView extends ListActivity {
 	private ImageLoader imageLoader;
 	private GestureImageView expandedImageView;
 	private ProgressBar expandedImageViewProgessBar;
+	private Animator zoomViewAnimator = null;
+	private int zoomViewAnimeDuration;
 	
-	//----------------------------
+	//--Adaptor--------------------------
 	class ImageListAdaptor extends BaseAdapter {
 		private LayoutInflater inflater;
 		
@@ -132,7 +141,7 @@ public class ImageListView extends ListActivity {
 				public void onClick(View v) {
 					Log.v(TAG, "Image item clicked");
 					ImageListItemView i = (ImageListItemView) v.getTag();
-					displayExpandedImage(i.index);
+					displayExpandedImage(i.imageView, i.index);
 				}
 			});
 			return convertView;
@@ -146,7 +155,7 @@ public class ImageListView extends ListActivity {
 		expandedImageView.setMinScale(0.1f);
 		expandedImageView.setFocusable(true);
 		expandedImageView.setFocusableInTouchMode(true);
-		expandedImageView.setScaleType(ScaleType.CENTER);
+		expandedImageView.setScaleType(ScaleType.CENTER_INSIDE);
 		expandedImageView.setVisibility(View.GONE);
 		
 		expandedImageViewProgessBar = (ProgressBar) findViewById(R.id.expandedImageProgressBar);
@@ -154,6 +163,7 @@ public class ImageListView extends ListActivity {
 	}
 	
 	private void initListeners() {
+		/*
 		expandedImageView.setOnClickListener(new View.OnClickListener() {
 			
 			@Override
@@ -161,6 +171,7 @@ public class ImageListView extends ListActivity {
 				v.setVisibility(View.GONE);
 			}
 		});
+		*/
 	}
 
 	@Override
@@ -173,6 +184,7 @@ public class ImageListView extends ListActivity {
 		loadFileList();
 		initImageLoader();
 		setListAdapter(new ImageListAdaptor(this));
+		zoomViewAnimeDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
 	}
 	
 	private void initImageLoader() {
@@ -209,14 +221,14 @@ public class ImageListView extends ListActivity {
 		}
 	}
 	
-	private void displayExpandedImage(int idx) {
+	private void displayExpandedImage(final View v, final int idx) {
 		String p = "file://" + path + File.separator + fileList[idx];
-
+		expandedImageView.setImageBitmap(null);
 		imageLoader.displayImage(p, expandedImageView, new ImageLoadingListener() {
 			
 			@Override
 			public void onLoadingStarted(String imageUri, View view) {
-				expandedImageView.setAlpha(0f);
+				zoomExpandedImage(v, idx);
 				expandedImageViewProgessBar.setVisibility(View.VISIBLE);
 			}
 			
@@ -228,7 +240,6 @@ public class ImageListView extends ListActivity {
 			
 			@Override
 			public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-				expandedImageView.setAlpha(1f);
 				expandedImageViewProgessBar.setVisibility(View.GONE);
 			}
 			
@@ -240,4 +251,122 @@ public class ImageListView extends ListActivity {
 		expandedImageView.setVisibility(View.VISIBLE);
 	}
 	
+	private void zoomExpandedImage(final View view, int idx) {
+		if (zoomViewAnimator != null) {
+			zoomViewAnimator.cancel();
+		}
+		
+		final Rect startBound = new Rect();
+		final Rect endBound = new Rect();
+		final Point globalOffsetPoint = new Point();
+		
+		view.getGlobalVisibleRect(startBound);
+		findViewById(R.id.image_list_frame_layout).getGlobalVisibleRect(endBound, globalOffsetPoint);
+		startBound.offset(-globalOffsetPoint.x, -globalOffsetPoint.y);
+		endBound.offset(-globalOffsetPoint.x, -globalOffsetPoint.y);
+
+		Bitmap image = ((BitmapDrawable)((ImageView) view).getDrawable()).getBitmap();
+		float imageRatio = (float) (image.getWidth()) / image.getHeight();
+		float viewRatio = (float) startBound.width() / startBound.height();
+		float imageToViewScale = 1f;
+		
+		if (imageRatio > viewRatio) {
+			imageToViewScale = (float) startBound.width() / image.getWidth();
+			float startHeight = image.getHeight() * imageToViewScale;
+			float deltaHeight = (startBound.height() - startHeight) / 2;
+			startBound.top += deltaHeight;
+			startBound.bottom -= deltaHeight;
+		} else {
+			imageToViewScale = (float) startBound.height() / image.getHeight();
+			float startWidth = image.getWidth() * imageToViewScale;
+			float deltaWidth = (startBound.width() - startWidth) / 2;
+			startBound.left += deltaWidth;
+			startBound.right -= deltaWidth;
+		}
+		
+		float startScale;
+
+		if ((float) endBound.width() / endBound.height()
+				> (float) startBound.width() / startBound.height()) {
+			startScale = (float) startBound.height() / endBound.height();
+			float startWidth = startScale * endBound.width();
+			float deltaWidth = (startWidth - startBound.width()) / 2;
+			startBound.left -= deltaWidth;
+			startBound.right += deltaWidth;
+		} else {
+			startScale = (float) startBound.width() / endBound.width();
+			float startHeight = startScale * endBound.height();
+			float deltaHeight = (startHeight - startBound.height()) / 2;
+			startBound.top -= deltaHeight;
+			startBound.bottom += deltaHeight;
+		}
+		
+		view.setAlpha(0f);
+		expandedImageView.setVisibility(View.VISIBLE);
+		expandedImageView.setPivotX(0f);
+		expandedImageView.setPivotY(0f);
+		
+		AnimatorSet set = new AnimatorSet();
+		
+		set.play(ObjectAnimator.ofFloat(expandedImageView, View.X, startBound.left, endBound.left))
+		   .with(ObjectAnimator.ofFloat(expandedImageView, View.Y, startBound.top, endBound.top))
+		   .with(ObjectAnimator.ofFloat(expandedImageView, View.SCALE_X, startScale, 1f))
+		   .with(ObjectAnimator.ofFloat(expandedImageView, View.SCALE_Y, startScale, 1f));
+		set.setDuration(zoomViewAnimeDuration);
+		set.setInterpolator(new DecelerateInterpolator());
+		set.addListener(new AnimatorListenerAdapter() {
+			@Override
+			public void onAnimationEnd(Animator animation) {
+				animation = null;
+			}
+			
+			@Override
+			public void onAnimationCancel(Animator animation) {
+				animation = null;
+			}
+		});
+
+		set.start();
+		zoomViewAnimator = set;
+		
+		final float startScaleFinal = startScale;
+		
+		expandedImageView.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				if (zoomViewAnimator != null) {
+					zoomViewAnimator.cancel();
+				}
+				
+				AnimatorSet set = new AnimatorSet();
+				
+                set.play(ObjectAnimator.ofFloat(expandedImageView, View.X, startBound.left))
+                   .with(ObjectAnimator.ofFloat(expandedImageView, View.Y, startBound.top))
+                   .with(ObjectAnimator.ofFloat(expandedImageView, View.SCALE_X, startScaleFinal))
+                   .with(ObjectAnimator.ofFloat(expandedImageView, View.SCALE_Y, startScaleFinal));
+
+                set.setDuration(zoomViewAnimeDuration);
+                set.setInterpolator(new DecelerateInterpolator());
+
+                set.addListener(new AnimatorListenerAdapter() {
+                	@Override
+                	public void onAnimationEnd(Animator animation) {
+                		view.setAlpha(1f);
+                            expandedImageView.setVisibility(View.GONE);
+                            animation = null;
+                        }
+                                        
+                        @Override
+                        public void onAnimationCancel(Animator animation) {
+                            view.setAlpha(1f);
+                            expandedImageView.setVisibility(View.GONE);
+                            animation = null;
+                        }
+                    });
+                set.start();
+                zoomViewAnimator = set;
+			}
+		});
+	}	
 }

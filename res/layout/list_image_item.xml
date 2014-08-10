@@ -6,8 +6,10 @@
 
     <ImageView
         android:id="@+id/imageItemView"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter"
         android:src="@drawable/abc_ab_bottom_solid_dark_holo" />
 
     <TextView
