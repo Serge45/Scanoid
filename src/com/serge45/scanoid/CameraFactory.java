@@ -1,10 +1,13 @@
 package com.serge45.scanoid;
 
+import java.util.List;
+
 import android.R.integer;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.hardware.Camera.AutoFocusCallback;
+import android.hardware.Camera.Size;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -21,193 +24,199 @@ import android.widget.Toast;
  * */
 
 public class CameraFactory {
-	//if using thread to run it, it need to be asynchronous thread 
-	//to avoid interrupt the main thread operation
-	//there are specific cameras could be accessed by using Camera.open(int) method
-	//Assume the all user's cell phone has front and back camera.......
-	private static final String TAG = "CameraFactory";
-	private int mFront = -1;
-	private int mBack  = -1;
-	private Camera  mCamera  = null;
-	private Context mContext = null;
-	private boolean mIsFront = false;
-	private CameraSetting  mCameraSetting = null;
-	private PackageManager mPackageManager = null;
-	private int cameraSensorOrientation = 0;
-	private AutoFocusCallback mFocusCallback = new Camera.AutoFocusCallback() {
-		// it will start when mode of focus is "focus_mode_auto" or "focus_mode_macro"
-		@Override
-		public void onAutoFocus(boolean success, Camera camera) {
-			Log.d("ryan","autofocus is starting....");
-		}
-	};
+    // if using thread to run it, it need to be asynchronous thread
+    // to avoid interrupt the main thread operation
+    // there are specific cameras could be accessed by using Camera.open(int)
+    // method
+    // Assume the all user's cell phone has front and back camera.......
+    private static final String TAG = "CameraFactory";
+    private int mFront = -1;
+    private int mBack = -1;
+    private Camera mCamera = null;
+    private Context mContext = null;
+    private boolean mIsFront = false;
+    private CameraSetting mCameraSetting = null;
+    private PackageManager mPackageManager = null;
+    private int cameraSensorOrientation = 0;
+    private AutoFocusCallback mFocusCallback = new Camera.AutoFocusCallback() {
+        // it will start when mode of focus is "focus_mode_auto" or
+        // "focus_mode_macro"
+        @Override
+        public void onAutoFocus(boolean success, Camera camera) {
+            Log.d("ryan", "autofocus is starting....");
+        }
+    };
 
-	public CameraFactory(Context context) {
-		mContext = context;
-		mPackageManager = mContext.getPackageManager();
-		getCameraInfo();
-	}
-	
-	public boolean isFront() {
-		return mIsFront;
-	}
-	
-	public int getSensorOrientation() {
-		return cameraSensorOrientation;
-	}
+    public CameraFactory(Context context) {
+        mContext = context;
+        mPackageManager = mContext.getPackageManager();
+        getCameraInfo();
+    }
 
-	public void getCameraInstance() {
-		try {
-			if(mIsFront) {
-				Log.d("ryan","Front:" + mFront);
-				mCamera = Camera.open(mFront);
-			}
-			else {
-				Log.d("ryan","Back:" + mBack);
-				mCamera = Camera.open(mBack);
-			}
-			mCameraSetting = new CameraSetting(mCamera);
-		}
-		catch (Exception e) {
-			Log.d(TAG,"Can not get the camera instance");
-			Toast.makeText(mContext, "Can not open camera instance", Toast.LENGTH_SHORT).show();
-		}
-	}
+    public boolean isFront() {
+        return mIsFront;
+    }
 
-	public void takePicture(final Camera.ShutterCallback shutter, final Camera.PictureCallback raw, final Camera.PictureCallback jpeg) {
-		if(mCamera != null) {
-			Log.d("ryan", "take a picture");
-			if(mIsFront == false && mPackageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_AUTOFOCUS)) {
-				mCamera.autoFocus(mFocusCallback);
-			}
-			mCamera.takePicture(shutter, raw, jpeg);
-		}
-	}
+    public int getSensorOrientation() {
+        return cameraSensorOrientation;
+    }
 
-	public void changeCameraFacing() {
-		Log.d("ryan","IsFront:" + mIsFront);
+    public void getCameraInstance() {
+        try {
+            if (mIsFront) {
+                Log.d("ryan", "Front:" + mFront);
+                mCamera = Camera.open(mFront);
+            } else {
+                Log.d("ryan", "Back:" + mBack);
+                mCamera = Camera.open(mBack);
+            }
+            mCameraSetting = new CameraSetting(mCamera);
+        } catch (Exception e) {
+            Log.d(TAG, "Can not get the camera instance");
+            Toast.makeText(mContext, "Can not open camera instance",
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
 
-		try {
-			if(mCamera == null) {
-				if(mIsFront && mBack != -1) {
-					Log.d("ryan","change");
-					mCamera  = Camera.open(mBack);
-				}
-				else if(mFront != -1) {
-					Log.d("ryan","change to front");
-					mCamera  = Camera.open(mFront);
-				}
-			}
-		} catch (NullPointerException e) {
-			Log.d("ryan", e.getMessage());
-			Log.d("ryan","camera can not open");
-		}
-		mCameraSetting = null;
-		mCameraSetting = new CameraSetting(mCamera);
+    public void takePicture(final Camera.ShutterCallback shutter,
+            final Camera.PictureCallback raw, final Camera.PictureCallback jpeg) {
+        if (mCamera != null) {
+            Log.d("ryan", "take a picture");
+            if (mIsFront == false
+                    && mPackageManager
+                            .hasSystemFeature(PackageManager.FEATURE_CAMERA_AUTOFOCUS)) {
+                mCamera.autoFocus(mFocusCallback);
+            }
+            mCamera.takePicture(shutter, raw, jpeg);
+        }
+    }
 
-		mIsFront = !mIsFront;
-		mCamera.startPreview();
-	}
+    public void changeCameraFacing() {
+        Log.d("ryan", "IsFront:" + mIsFront);
 
-	public void initCameraParams(int width, int height) {
-		if(mCamera == null) return;
+        try {
+            if (mCamera == null) {
+                if (mIsFront && mBack != -1) {
+                    Log.d("ryan", "change");
+                    mCamera = Camera.open(mBack);
+                } else if (mFront != -1) {
+                    Log.d("ryan", "change to front");
+                    mCamera = Camera.open(mFront);
+                }
+            }
+        } catch (NullPointerException e) {
+            Log.d("ryan", e.getMessage());
+            Log.d("ryan", "camera can not open");
+        }
+        mCameraSetting = null;
+        mCameraSetting = new CameraSetting(mCamera);
 
-		String focusMode = null;
-		Camera.Parameters params = mCamera.getParameters();
-		
-		mCamera.setDisplayOrientation(ImageOrientationHelper.getNeedRotationAngle(mContext, cameraSensorOrientation));
+        mIsFront = !mIsFront;
+        mCamera.startPreview();
+    }
 
-		Camera.Size optimalSize = getOptimalPreviewSize(width, height, params);
+    public Camera.Size initCameraParams(int width, int height) {
+        if (mCamera == null)
+            return null;
 
-		params.setPreviewSize(optimalSize.width, optimalSize.height);
+        String focusMode = null;
+        Camera.Parameters params = mCamera.getParameters();
 
-		Log.d("ryan","setparam IsFront:" + mIsFront);
+        mCamera.setDisplayOrientation(ImageOrientationHelper
+                .getNeedRotationAngle(mContext, cameraSensorOrientation));
 
-		if(mIsFront == false && (focusMode = mCameraSetting.getFocusMode()) != null){
-			params.setFocusMode(focusMode);
-		}
-		mCamera.setParameters(params);
-	}
+        Camera.Size optimalSize = getOptimalPreviewSize(width, height, params);
 
-	private Camera.Size getOptimalPreviewSize(int width, int height, Camera.Parameters params) {
+        params.setPreviewSize(optimalSize.width, optimalSize.height);
+        Log.d("ryan", "setparam IsFront:" + mIsFront);
 
-		Camera.Size optimalSize = null;
-		
-		float screenRatio = (float) (width) / height;
-		float cameraRatio = 0;
-		float ratioDiff = 100;
+        if (mIsFront == false
+                && (focusMode = mCameraSetting.getFocusMode()) != null) {
+            params.setFocusMode(focusMode);
+        }
+        mCamera.setParameters(params);
+        return optimalSize;
+    }
 
-		for(Camera.Size size : params.getSupportedPreviewSizes()) {
-			if(size.width <= width && size.height <= height) {
-				if(optimalSize == null) {
-					optimalSize = size;
-				}
-				else {
-					int optimalArea = optimalSize.width * optimalSize.height;
-					int newArea = size.width * size.height;
+    private Camera.Size getOptimalPreviewSize(int width, int height,
+            Camera.Parameters params) {
 
-					/*
-					if(newArea > optimalArea) {
-						optimalArea = newArea;
-					}
-					*/
+        Camera.Size optimalSize = null;
 
-					cameraRatio = (float) (optimalSize.width) / optimalSize.height;
-					float newDiff = Math.abs(cameraRatio - screenRatio); 
-					
-					if (newDiff <= ratioDiff && newArea >= optimalArea) {
-						optimalSize = size;
-						ratioDiff = newDiff;
-					}
+        float screenRatio = (float) (width) / height;
+        float cameraRatio = 0;
+        float ratioDiff = 100;
+        List<Camera.Size> supportSizes = params.getSupportedPreviewSizes();
 
-				}
-			}
-		}
-		return optimalSize;
-	}
+        for (Camera.Size size : supportSizes) {
+            if (size.width <= width && size.height <= height) {
+                if (optimalSize == null) {
+                    optimalSize = size;
+                } else {
+                    int optimalArea = optimalSize.width * optimalSize.height;
+                    int newArea = size.width * size.height;
 
-	public void removeCameraInstance() {
-		if(mCamera != null) {
-			Log.d("ryan","removeCameraInstance");
-			mCamera.stopPreview();
-			mCamera.setPreviewCallback(null);
-			mCamera.release();
-			mCamera = null;	
-		}
-	}
+                    if(newArea >= optimalArea) { 
+                        optimalArea = newArea;
+                    }
 
-	private void getCameraInfo() {
-		Log.d("ryan", "getCameraInfo");
-		Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
-		cameraSensorOrientation = cameraInfo.orientation;
-		int cameraCount = Camera.getNumberOfCameras();
+                    cameraRatio = (float) (optimalSize.width)
+                            / optimalSize.height;
+                    float newDiff = Math.abs(cameraRatio - screenRatio);
 
-		for(int cameraId = 0; cameraId < cameraCount; cameraId++) {
+                    if (newDiff <= ratioDiff && newArea >= optimalArea) {
+                        optimalSize = size;
+                        ratioDiff = newDiff;
+                    }
 
-			Camera.getCameraInfo(cameraId, cameraInfo);
-			if(cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-				mFront = cameraId;
-				if (cameraCount <= 1) {
-					mIsFront = true;
-				}
-				Log.d("ryan","front:" + mFront);
-			} else if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_BACK) {
-				mBack = cameraId;
-				Log.d("ryan","mBack:" + mBack);
-			}
-		}
-	}
+                }
+            }
+        }
+        return optimalSize;
+    }
 
-	public Camera getCurrentCamera() {
-		return mCamera;
-	}
+    public void removeCameraInstance() {
+        if (mCamera != null) {
+            Log.d("ryan", "removeCameraInstance");
+            mCamera.stopPreview();
+            mCamera.setPreviewCallback(null);
+            mCamera.release();
+            mCamera = null;
+        }
+    }
 
-	public void restartPreview() {
-		if(mCamera == null) {
-			Log.d("ryan","Camera is null");
-			getCameraInstance();
-		}
-		Log.d("ryan","start preview");
-		mCamera.startPreview();
-	}
+    private void getCameraInfo() {
+        Log.d("ryan", "getCameraInfo");
+        Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
+        cameraSensorOrientation = cameraInfo.orientation;
+        int cameraCount = Camera.getNumberOfCameras();
+
+        for (int cameraId = 0; cameraId < cameraCount; cameraId++) {
+
+            Camera.getCameraInfo(cameraId, cameraInfo);
+            if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+                mFront = cameraId;
+                if (cameraCount <= 1) {
+                    mIsFront = true;
+                }
+                Log.d("ryan", "front:" + mFront);
+            } else if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_BACK) {
+                mBack = cameraId;
+                Log.d("ryan", "mBack:" + mBack);
+            }
+        }
+    }
+
+    public Camera getCurrentCamera() {
+        return mCamera;
+    }
+
+    public void restartPreview() {
+        if (mCamera == null) {
+            Log.d("ryan", "Camera is null");
+            getCameraInstance();
+        }
+        Log.d("ryan", "start preview");
+        mCamera.startPreview();
+    }
 }

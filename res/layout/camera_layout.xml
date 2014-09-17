@@ -9,6 +9,7 @@
         android:id="@+id/cameraPreview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_gravity="center"
         android:contentDescription="camera" />
 
     <LinearLayout
@@ -25,28 +26,15 @@
         android:showDividers="beginning|middle"
         android:visibility="visible" >
 
-        <ImageView
-            android:id="@+id/imageView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top|center_horizontal"
-            android:layout_margin="8dp"
-            android:layout_weight="1"
-            android:adjustViewBounds="false"
-            android:contentDescription="Image"
-            android:duplicateParentState="false"
-            android:fitsSystemWindows="true"
-            android:focusable="true"
-            android:minHeight="32dp"
-            android:minWidth="32dp"
-            android:scaleType="fitCenter"
-            android:visibility="visible" />
-
-        <Button
+        <ImageButton
             android:id="@+id/captureButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Capture" />
+            android:contentDescription="shot_button"
+            android:scaleType="fitCenter"
+            android:src="@drawable/shot"
+            android:text="Capture"
+            android:background="@null" />
 
     </LinearLayout>
 

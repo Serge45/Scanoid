@@ -12,43 +12,55 @@ import com.mburman.fileexplore.FileExplore;
 import com.serge45.scanoid.CameraViewActivity;
 
 public class MainActivity extends Activity {
-	static String TAG = "Main";
-	private Button cameraButton;
-	private Button documentButton;
-	
-	void initViews() {
-		cameraButton = (Button) findViewById(R.id.imageList);
-		documentButton = (Button) findViewById(R.id.viewDocButton);
-	}
-	
-	void initListeners() {
-		cameraButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Log.v(TAG, "Camera button clicked");
-				Intent intent = new Intent();
-				intent.setClass(MainActivity.this, CameraViewActivity.class);
-				startActivity(intent);
-			}
-		});
-		
-		documentButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Log.v(TAG, "Document button clicked");
-				Intent intent = new Intent();
-				intent.setClass(MainActivity.this, ImageListView.class);
-				startActivity(intent);	
-			}
-		});
-		
-	}
+    static String TAG = "Main";
+    private Button cameraButton;
+    private Button documentButton;
+    private Button testJniButton;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
-		initViews();
-		initListeners();
-	}
+    void initViews() {
+        cameraButton = (Button) findViewById(R.id.imageList);
+        documentButton = (Button) findViewById(R.id.viewDocButton);
+        testJniButton = (Button) findViewById(R.id.jni_button); 
+    }
+
+    void initListeners() {
+        cameraButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.v(TAG, "Camera button clicked");
+                Intent intent = new Intent();
+                intent.setClass(MainActivity.this, CameraViewActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        documentButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.v(TAG, "Document button clicked");
+                Intent intent = new Intent();
+                intent.setClass(MainActivity.this, ImageListView.class);
+                startActivity(intent);
+            }
+        });
+        
+        testJniButton.setOnClickListener(new View.OnClickListener() {
+            
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent();
+                intent.setClass(MainActivity.this, JniTestActivity.class);
+                startActivity(intent);
+            }
+        });
+
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        initViews();
+        initListeners();
+    }
 }

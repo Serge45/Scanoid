@@ -11,18 +11,4 @@
             android:layout_height="match_parent" >
         </ListView>
 
-        <com.polites.android.GestureImageView
-            android:id="@+id/expandedImageView"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_gravity="center"
-            android:scaleType="fitCenter" />
-
-        <ProgressBar
-            android:id="@+id/expandedImageProgressBar"
-            style="?android:attr/progressBarStyleLarge"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center" />
-
 </FrameLayout>
